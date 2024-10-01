@@ -45,8 +45,45 @@ pip install --no-cache-dir fastapi uvicorn requests streamlit
 
 
 Ensure these variables are properly set, or the application will fail to start.
+An explanation how to set them is given in the respective sections.
 
-### Setting Environment Variables
+## How to Run
+
+<details>
+<summary><b>Running Locally (Interactive mode)</b></summary>
+
+
+Start by setting the environment variables:
+
+```bash
+export WATSONX_IAM_APIKEY="your-ibm-api-key"
+export WATSONX_PROJECT_ID="your-watsonx-project-id"
+```
+
+If running interactively, use `uvicorn` to start the FastAPI application after setting the environment variables:
+
+```bash
+cd fastapi-watsonx
+
+uvicorn watsonxai-endpoint:app --reload --port 8080
+```
+
+</details>
+
+<details>
+<summary> <b>Running in Docker</b></summary>
+
+If you prefer to run this application in a Docker container, follow these steps:
+
+**1. Build the Docker image**
+
+**Project Version**
+```bash
+cd fastapi-watsonx
+docker build -t watsonxai-endpoint:1.0 .
+```
+
+**2. Setting Environment Variables**
 
 For Docker, pass the environment variables with the `-e` flag:
 
@@ -57,30 +94,19 @@ docker run -d -p 8080:8000 --name watsonxai-endpoint \
 watsonxai-endpoint:1.0
 ```
 
-For interactive mode, set them in your shell before starting the app:
+**3. Run the Docker container**
+This will start the application in a container, listening on port 8080, and interacting with Watsonx.ai via the provided credentials.
 
 ```bash
-export WATSONX_IAM_APIKEY="your-ibm-api-key"
-export WATSONX_PROJECT_ID="your-watsonx-project-id"
-
-cd fastapi-watsonx
-
-uvicorn watsonxai-endpoint:app --reload --port 8080
+docker run -d -p 8080:8000 --name watsonxai-endpoint \
+-e WATSONX_IAM_APIKEY="your-ibm-api-key" \
+-e WATSONX_PROJECT_ID="your-watsonx-project-id" \
+watsonxai-endpoint:1.0
 ```
+</details>
 
-## How to Run
-
-### Running Locally
-
-If running interactively, use `uvicorn` to start the FastAPI application after setting the environment variables:
-
-```bash
-cd fastapi-watsonx
-
-uvicorn watsonxai-endpoint:app --reload --port 8080
-```
-
-#### Validate with Curl
+## How to use
+### Use with Curl
 
 After starting the application, you can test it with a curl command:
 
@@ -95,30 +121,9 @@ curl http://127.0.0.1:8080/v1/completions \
 }'
 ```
 
-### Running in Docker
 
-If you prefer to run this application in a Docker container, follow these steps:
+### Use with Redhat instructLab
 
-**1. Build the Docker image**
-
-**Project Version**
-```bash
-cd fastapi-watsonx
-docker build -t watsonxai-endpoint:1.0 .
-```
-
-**2. Run the Docker container**
-
-```bash
-docker run -d -p 8080:8000 --name watsonxai-endpoint \
--e WATSONX_IAM_APIKEY="your-ibm-api-key" \
--e WATSONX_PROJECT_ID="your-watsonx-project-id" \
-watsonxai-endpoint:1.0
-```
-
-This will start the application in a container, listening on port 8080, and interacting with Watsonx.ai via the provided credentials.
-
-#### Use Redhat instructLab (project version)
 ```bash
 ilab data generate \
 --pipeline full \
