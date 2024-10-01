@@ -5,7 +5,7 @@ FROM python:3.10-slim
 WORKDIR /app
 
 # Copy only the openapi.py file into the container
-COPY openapi.py /app/watsonxai-endpoint.py
+COPY watsonxai-endpoint.py /app/watsonxai-endpoint.py
 
 # Install any needed packages
 RUN pip install --no-cache-dir fastapi uvicorn requests
