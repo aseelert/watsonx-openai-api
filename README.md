@@ -60,6 +60,8 @@ For interactive mode, set them in your shell before starting the app:
 export WATSONX_IAM_APIKEY="your-ibm-api-key"
 export WATSONX_PROJECT_ID="your-watsonx-project-id"
 
+cd fastapi-watsonx
+
 uvicorn watsonxai-endpoint:app --reload --port 8080
 ```
 
@@ -70,6 +72,8 @@ uvicorn watsonxai-endpoint:app --reload --port 8080
 If running interactively, use `uvicorn` to start the FastAPI application after setting the environment variables:
 
 ```bash
+cd cd fastapi-watsonx
+
 uvicorn watsonxai-endpoint:app --reload --port 8080
 ```
 
@@ -96,6 +100,7 @@ If you prefer to run this application in a Docker container, follow these steps:
 
 **Project Version**
 ```bash
+cd cd fastapi-watsonx
 docker build -t watsonxai-endpoint:1.0 .
 ```
 
