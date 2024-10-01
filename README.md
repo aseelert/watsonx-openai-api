@@ -12,12 +12,11 @@ This gateway provides a bridge between OpenAI’s API format and Watsonx.ai, all
 
 ## Installation
 
-**Clone the repository:
-
-    ```bash
-    git clone https://github.com/aseelert/watsonx-openapi
-    cd watsonx-openapi
-    ```
+**Clone the repository:**
+```bash
+git clone https://github.com/aseelert/watsonx-openapi
+cd watsonx-openapi
+```
 
 ## Prerequisites
 
