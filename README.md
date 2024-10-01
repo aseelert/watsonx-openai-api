@@ -21,6 +21,20 @@ git clone https://github.com/aseelert/watsonx-openai-api
 cd watsonx-openai-api
 ```
 
+<details>
+  <summary><h3>Click to expand for more details</h3></summary>
+
+  ## This is a collapsible section.
+  You can put any content here, including Markdown formatting.
+
+  - Bullet point 1
+  - Bullet point 2
+  - More content...
+
+</details>
+
+
+
 ## Prerequisites
 
 Before running this application, you need to set the following environment variables for both interactive mode and Docker:
