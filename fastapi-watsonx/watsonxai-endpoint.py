@@ -91,7 +91,7 @@ async def watsonx_completions(request: Request):
     watsonx_payload = {
         "input": prompt,
         "parameters": {
-            "decoding_method": "greedy",
+            "decoding_method": "sample",
             "max_new_tokens": max_tokens,
             "temperature": temperature,
             "top_k": 50,
