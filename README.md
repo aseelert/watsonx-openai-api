@@ -1,4 +1,4 @@
-[![Red Hat Instructlab](https://img.shields.io/badge/Redhat-Instructlab-red)](https://instructlab.ai/)
+[![Red Hat Instructlab](https://img.shields.io/badge/Redhat-Instructlab-purple)](https://instructlab.ai/)
 [![watsonx.ai](https://img.shields.io/badge/IBM-watsonx.ai-blue)](https://dataplatform.cloud.ibm.com/wx/home?context=wx)
 
 # FastAPI Watsonx-Compatible Gateway
