@@ -72,7 +72,7 @@ uvicorn watsonxai-endpoint:app --reload --port 8080
 If running interactively, use `uvicorn` to start the FastAPI application after setting the environment variables:
 
 ```bash
-cd cd fastapi-watsonx
+cd fastapi-watsonx
 
 uvicorn watsonxai-endpoint:app --reload --port 8080
 ```
@@ -100,7 +100,7 @@ If you prefer to run this application in a Docker container, follow these steps:
 
 **Project Version**
 ```bash
-cd cd fastapi-watsonx
+cd fastapi-watsonx
 docker build -t watsonxai-endpoint:1.0 .
 ```
 
