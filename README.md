@@ -22,6 +22,11 @@ cd watsonx-openai-api
 
 Before running this application, you need to set the following environment variables for both interactive mode and Docker:
 
+**install pip packages:**
+```bash
+pip install --no-cache-dir fastapi uvicorn requests streamlit
+```
+
 ### Required Environment Variables
 
 - **`WATSONX_IAM_APIKEY`**: The IBM API key required to authenticate with Watsonx.ai.
