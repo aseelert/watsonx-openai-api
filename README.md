@@ -1,3 +1,6 @@
+[![Red Hat Instructlab](https://img.shields.io/badge/Redhat-Instructlab-red)](https://instructlab.ai/)
+[![watsonx.ai](https://img.shields.io/badge/IBM-watsonx.ai-blue)](https://dataplatform.cloud.ibm.com/wx/home?context=wx)
+
 # FastAPI Watsonx-Compatible Gateway
 
 This repository hosts a FastAPI application that forwards OpenAI-style `/v1/completions` requests to IBM Watsonx.ai’s text generation service. The gateway allows users to send requests using the legacy OpenAI format while interacting with Watsonx.ai models.
