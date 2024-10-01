@@ -103,6 +103,13 @@ docker run -d -p 8080:8000 --name watsonxai-endpoint \
 -e WATSONX_PROJECT_ID="your-watsonx-project-id" \
 watsonxai-endpoint:1.0
 ```
+
+**4. Activate live logs**
+
+```bash
+podman logs -f watsonxai-endpoint
+```
+
 </details>
 
 ## How to use
