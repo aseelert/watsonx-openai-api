@@ -22,6 +22,14 @@ cd watsonx-openai-api
 
 Before running this application, you need to set the following environment variables for both interactive mode and Docker:
 
+
+**install python 3.11 venv:**
+```bash
+dnf -y install python3.11 python3.11-venv python3.11-dev
+python3.11 -m venv venv
+source ~/env/bin/activate
+```
+
 **install pip packages:**
 ```bash
 pip install --no-cache-dir fastapi uvicorn requests streamlit
