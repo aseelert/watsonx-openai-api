@@ -14,8 +14,8 @@ This gateway provides a bridge between OpenAI’s API format and Watsonx.ai, all
 
 **Clone the repository:**
 ```bash
-git clone https://github.com/aseelert/watsonx-openapi
-cd watsonx-openapi
+git clone https://github.com/aseelert/watsonx-openai-api
+cd watsonx-openai-api
 ```
 
 ## Prerequisites
