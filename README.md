@@ -156,17 +156,16 @@ docker run -d -p 8080:8000 --name watsonxai-endpoint \
 watsonxai-endpoint:1.0
 ```
 
+</details>
 
-
-**4. Activate live logs**
+### How to Monitor
+**Activate live logs**
 
 ```bash
 docker logs -f watsonxai-endpoint
 ```
 
-</details>
 
-## How to use
 ### Use with Curl
 
 After starting the application, you can test it with a curl command:
