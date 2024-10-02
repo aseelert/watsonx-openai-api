@@ -1,6 +1,6 @@
 [![Red Hat Instructlab](https://img.shields.io/badge/Redhat-Instructlab-purple)](https://instructlab.ai/)
 [![watsonx.ai](https://img.shields.io/badge/IBM-watsonx.ai-blue)](https://dataplatform.cloud.ibm.com/wx/home?context=wx)
-[![Docker Pulls](https://img.shields.io/docker/pulls/aseelert/watsonxai-endpoint)](https://hub.docker.com/r/aseelert/watsonxai-endpoint)
+[![Docker Pulls](https://img.shields.io/docker/version/aseelert/watsonxai-endpoint)](https://hub.docker.com/r/aseelert/watsonxai-endpoint)
 
 # FastAPI watsonx-Compatible Gateway
 
