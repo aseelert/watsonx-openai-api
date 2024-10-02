@@ -66,9 +66,9 @@ cd watsonx-openai-api
 
 Before running this application, you need to set the following environment variables for both interactive mode and Docker:
 
-- You have an IBM Cloud IAM key (watsonx_IAM_APIKEY) for authentication.
+- You have an IBM Cloud IAM key **`(WATSONX_IAM_APIKEY)`** for authentication.
+- You have a Project ID **`(WATSONX_PROJECT_ID)`** of the watsonx.ai project.
 - Your watsonx.ai project has a Watson Machine Learning instance associated, which is required to manage machine learning models.
-- You have a Project ID (watsonx_PROJECT_ID) of the watsonx.ai project.
 
 
 **install python 3.11 venv:**
@@ -86,14 +86,14 @@ pip install --no-cache-dir fastapi uvicorn requests streamlit
 
 ### Required Environment Variables
 
-- **`watsonx_IAM_APIKEY`**: The IBM API key required to authenticate with watsonx.ai.
-- **`watsonx_PROJECT_ID`**: The Porject ID for watsonx.ai, where the requests will be forwarded.
+- **`WATSONX_IAM_APIKEY`**: The IBM API key required to authenticate with watsonx.ai.
+- **`WATSONX_PROJECT_ID`**: The Porject ID for watsonx.ai, where the requests will be forwarded.
 
 Start by setting the environment variables:
 
 ```bash
-export watsonx_IAM_APIKEY="your-ibm-api-key"
-export watsonx_PROJECT_ID="your-watsonx-project-id"
+export WATSONX_IAM_APIKEY="your-ibm-api-key"
+export WATSONX_PROJECT_ID="your-watsonx-project-id"
 ```
 
 Ensure these variables are properly set, or the application will fail to start.
@@ -127,8 +127,8 @@ This will start the application in a container, listening on port 8080, and inte
 
 ```bash
 docker run -d -p 8080:8000 --name watsonxai-endpoint \
--e watsonx_IAM_APIKEY=${watsonx_IAM_APIKEY} \
--e watsonx_PROJECT_ID=${watsonx_PROJECT_ID} \
+-e WATSONX_IAM_APIKEY=${watsonx_IAM_APIKEY} \
+-e WATSONX_PROJECT_ID=${watsonx_PROJECT_ID} \
 aseelert/watsonxai-endpoint:1.0
 ```
 </details>
@@ -149,8 +149,8 @@ For Docker, pass the environment variables with the `-e` flag:
 
 ```bash
 docker run -d -p 8080:8000 --name watsonxai-endpoint \
--e watsonx_IAM_APIKEY=${watsonx_IAM_APIKEY} \
--e watsonx_PROJECT_ID=${watsonx_PROJECT_ID} \
+-e WATSONX_IAM_APIKEY=${watsonx_IAM_APIKEY} \
+-e WATSONX_PROJECT_ID=${watsonx_PROJECT_ID} \
 watsonxai-endpoint:1.0
 ```
 
