@@ -106,9 +106,6 @@ An explanation how to set them is given in the respective sections.
 <details>
 <summary><b>Run local (Interactive mode)</b></summary>
 
-
-
-
 If running interactively, use `uvicorn` to start the FastAPI application after setting the environment variables:
 
 ```bash
@@ -133,13 +130,18 @@ docker run -d -p 8080:8000 --name watsonxai-endpoint \
 -e WATSONX_PROJECT_ID=${WATSONX_PROJECT_ID} \
 aseelert/watsonxai-endpoint:1.0
 ```
+
+**2. Activate live logs**
+
+```bash
+docker logs -f watsonxai-endpoint
+```
 </details>
 
 <details>
 <summary> <b>Build own Docker image</b></summary>
-**1. Build your own local Docker image**
 
-**Project Version**
+**1. Build a local docker image**
 ```bash
 cd fastapi-watsonx
 docker build -t watsonxai-endpoint:1.0 .
@@ -156,14 +158,15 @@ docker run -d -p 8080:8000 --name watsonxai-endpoint \
 watsonxai-endpoint:1.0
 ```
 
-</details>
-
-### How to Monitor
-**Activate live logs**
+**3. Activate live logs**
 
 ```bash
 docker logs -f watsonxai-endpoint
 ```
+
+</details>
+
+
 
 
 ### Use with Curl
