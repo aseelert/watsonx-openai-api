@@ -70,6 +70,7 @@ Before running this application, you need to set the following environment varia
 - You have an IBM Cloud IAM key **`(WATSONX_IAM_APIKEY)`** for authentication.
 - You have a Project ID **`(WATSONX_PROJECT_ID)`** of the watsonx.ai project.
 - Your watsonx.ai project has a Watson Machine Learning instance associated, which is required to manage machine learning models.
+- If instructlab data generation will be use, we assume ilab is already installed.
 
 
 **install python 3.11 venv:**
