@@ -81,6 +81,7 @@ async def watsonx_completions(request: Request):
     max_tokens = request_data.get("max_tokens", 2000)
     temperature = request_data.get("temperature", 0.2)
     model_id = request_data.get("model", "mistralai/mistral-large")  # Default model_id if not provided
+    presence_penalty = request_data.get("presence_penalty", 1)
 
     logger.debug(f"Prompt: {prompt[:200]}..., Max Tokens: {max_tokens}, Temperature: {temperature}, Model ID: {model_id}")
 
@@ -96,7 +97,7 @@ async def watsonx_completions(request: Request):
             "temperature": temperature,
             "top_k": 50,
             "top_p": 1,
-            "repetition_penalty": 1
+            "repetition_penalty": presence_penalty
         },
         "model_id": model_id,
         "project_id": PROJECT_ID
