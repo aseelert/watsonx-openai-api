@@ -28,9 +28,10 @@ Before running this application, you need to set the following environment varia
 
 **install python 3.11 venv:**
 ```bash
-dnf -y install python3.11 python3.11-devel
+sudo dnf -y install python3.11 python3.11-devel jq
 python3.11 -m venv venv
-source ~/watsonx-openai-api/env/bin/activate
+source ~/watsonx-openai-api/venv/bin/activate
+pip install --upgrade pip
 ```
 
 **install pip packages:**
@@ -83,14 +84,14 @@ cd fastapi-watsonx
 docker build -t watsonxai-endpoint:1.0 .
 ```
 
-**2. Setting Environment Variables**
+**2. Run Docker with IBM Variables**
 
 For Docker, pass the environment variables with the `-e` flag:
 
 ```bash
 docker run -d -p 8080:8000 --name watsonxai-endpoint \
--e WATSONX_IAM_APIKEY="your-ibm-api-key" \
--e WATSONX_PROJECT_ID="your-watsonx-project-id" \
+-e WATSONX_IAM_APIKEY=${WATSONX_IAM_APIKEY} \
+-e WATSONX_PROJECT_ID=${WATSONX_PROJECT_ID} \
 watsonxai-endpoint:1.0
 ```
 
@@ -107,7 +108,7 @@ watsonxai-endpoint:1.0
 **4. Activate live logs**
 
 ```bash
-podman logs -f watsonxai-endpoint
+docker logs -f watsonxai-endpoint
 ```
 
 </details>
@@ -120,12 +121,11 @@ After starting the application, you can test it with a curl command:
 ```bash
 curl http://127.0.0.1:8080/v1/completions \
 -H "Content-Type: application/json" \
--H "Authorization: Bearer <your-IBM-token>" \
 -d '{
   "prompt": "Explain Watsonx.ai advantages.",
   "max_tokens": 50,
   "temperature": 0.7
-}'
+}'|jq
 ```
 
 
