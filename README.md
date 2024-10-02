@@ -127,8 +127,8 @@ This will start the application in a container, listening on port 8080, and inte
 
 ```bash
 docker run -d -p 8080:8000 --name watsonxai-endpoint \
--e WATSONX_IAM_APIKEY=${watsonx_IAM_APIKEY} \
--e WATSONX_PROJECT_ID=${watsonx_PROJECT_ID} \
+-e WATSONX_IAM_APIKEY=${WATSONX_IAM_APIKEY} \
+-e WATSONX_PROJECT_ID=${WATSONX_PROJECT_ID} \
 aseelert/watsonxai-endpoint:1.0
 ```
 </details>
@@ -149,8 +149,8 @@ For Docker, pass the environment variables with the `-e` flag:
 
 ```bash
 docker run -d -p 8080:8000 --name watsonxai-endpoint \
--e WATSONX_IAM_APIKEY=${watsonx_IAM_APIKEY} \
--e WATSONX_PROJECT_ID=${watsonx_PROJECT_ID} \
+-e WATSONX_IAM_APIKEY=${WATSONX_IAM_APIKEY} \
+-e WATSONX_PROJECT_ID=${WATSONX_PROJECT_ID} \
 watsonxai-endpoint:1.0
 ```
 
