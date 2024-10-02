@@ -212,3 +212,22 @@ This gateway mimics the OpenAI `/v1/completions` endpoint while forwarding reque
 ---
 
 This gateway ensures compatibility between legacy applications and watsonx.ai, providing a flexible solution for text generation services.
+
+### Appendix
+Get the current list of LLMs of Saas watsonx.ai instance
+```bash
+pip install ibm_watsonx_ai
+```
+```python
+import os
+import pandas as pd
+from ibm_watsonx_ai import APIClient, Credentials
+
+IBM_API_KEY = os.getenv("WATSONX_IAM_APIKEY")
+credentials = Credentials(
+    url="https://us-south.ml.cloud.ibm.com",
+    api_key=IBM_API_KEY,
+)
+api_client = APIClient(credentials)
+models = api_client.foundation_models.TextModels.show()
+```
