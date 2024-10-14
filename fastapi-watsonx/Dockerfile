@@ -16,6 +16,7 @@ EXPOSE 8000
 # Set environment variables for Watsonx API key and URL (to be set at runtime)
 ENV WATSONX_IAM_APIKEY=""
 ENV WATSONX_PROJECT_ID=""
+ENV WATSONX_REGION=""
 
 # Define environment variable for Python to avoid buffering
 ENV PYTHONUNBUFFERED=1
