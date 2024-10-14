@@ -69,9 +69,9 @@ Before running this application, you need to set the following environment varia
 
 - You have an IBM Cloud IAM key **`(WATSONX_IAM_APIKEY)`** for authentication.
 - You have a Project ID **`(WATSONX_PROJECT_ID)`** of the watsonx.ai project.
+- You have a Server Regions **`(WATSONX_REGION)`** of the watsonx.ai project. (supported: ["us-south", "eu-gb", "jp-tok", "eu-de"])
 - Your watsonx.ai project has a Watson Machine Learning instance associated, which is required to manage machine learning models.
 - If instructlab data generation will be use, we assume ilab is already installed.
-
 
 **install python 3.11 venv:**
 ```bash
@@ -89,13 +89,15 @@ pip install --no-cache-dir fastapi uvicorn requests streamlit
 ### Required Environment Variables
 
 - **`WATSONX_IAM_APIKEY`**: The IBM API key required to authenticate with watsonx.ai.
-- **`WATSONX_PROJECT_ID`**: The Porject ID for watsonx.ai, where the requests will be forwarded.
+- **`WATSONX_PROJECT_ID`**: The Project ID for watsonx.ai, where the requests will be forwarded.
+- **`WATSONX_REGION`**: The ProjectRegion for watsonx.ai ("us-south", "eu-gb", "jp-tok", "eu-de")
 
 Start by setting the environment variables:
 
 ```bash
 export WATSONX_IAM_APIKEY="your-ibm-api-key"
 export WATSONX_PROJECT_ID="your-watsonx-project-id"
+export WATSONX_REGION="your-watsonx-project-region"
 ```
 
 Ensure these variables are properly set, or the application will fail to start.
@@ -128,6 +130,7 @@ This will start the application in a container, listening on port 8080, and inte
 docker run -d -p 8080:8000 --name watsonxai-endpoint \
 -e WATSONX_IAM_APIKEY=${WATSONX_IAM_APIKEY} \
 -e WATSONX_PROJECT_ID=${WATSONX_PROJECT_ID} \
+-e WATSONX_REGION=${WATSONX_REGION} \
 aseelert/watsonxai-endpoint:1.0
 ```
 
@@ -155,6 +158,7 @@ For Docker, pass the environment variables with the `-e` flag:
 docker run -d -p 8080:8000 --name watsonxai-endpoint \
 -e WATSONX_IAM_APIKEY=${WATSONX_IAM_APIKEY} \
 -e WATSONX_PROJECT_ID=${WATSONX_PROJECT_ID} \
+-e WATSONX_REGION=${WATSONX_REGION} \
 watsonxai-endpoint:1.0
 ```
 
