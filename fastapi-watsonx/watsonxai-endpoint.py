@@ -5,8 +5,14 @@ import time
 import uuid
 import logging
 import json
+from tabulate import tabulate
 
 app = FastAPI()
+
+# Function to check if the app is running inside Docker
+def is_running_in_docker():
+    """Check if the app is running inside Docker by checking for specific environment variables or Docker files."""
+    return os.path.exists('/.dockerenv') or os.getenv("DOCKER") == "true"
 
 # Logging configuration
 logging.basicConfig(
@@ -16,6 +22,31 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# Mapping of valid regions
+valid_regions = ["us-south", "eu-gb", "jp-tok", "eu-de"]
+
+# Get region from env variable
+region = os.getenv("WATSONX_REGION")
+
+# Handle behavior based on environment (Docker vs. Interactive mode)
+if not region or region not in valid_regions:
+    if is_running_in_docker():
+        # In Docker, raise an error if WATSONX_REGION is missing or invalid
+        logger.error(f"WATSONX_REGION key is not set or invalid. Supported regions are: {', '.join(valid_regions)}.")
+        raise SystemExit(f"WATSONX_REGION is required. Supported regions are: {', '.join(valid_regions)}.")
+    else:
+        # In interactive mode, prompt the user for the region
+        print("Please select a region from the following options:")
+        for idx, reg in enumerate(valid_regions, start=1):
+            print(f"{idx}. {reg}")
+        
+        choice = input("Enter the number corresponding to your region: ")
+        
+        try:
+            region = valid_regions[int(choice) - 1]
+        except (IndexError, ValueError):
+            raise ValueError("Invalid region selection. Please restart and select a valid option.")
+
 # Mapping of each region to URL
 WATSONX_URLS = {
     "us-south": "https://us-south.ml.cloud.ibm.com",
@@ -24,22 +55,8 @@ WATSONX_URLS = {
     "eu-de": "https://eu-de.ml.cloud.ibm.com"
 }
 
-# Get region from env variable
-region = os.getenv("WATSONX_REGION")
-
-# If no region var is set, ask user to input it
-if not region:
-    print("Please select a region:")
-    for idx, reg in enumerate(WATSONX_URLS.keys(), start=1):
-        print(f"{idx}. {reg}")
-    
-    # Get user input and validate
-    choice = input("Enter the number corresponding to your region: ")
-    
-    try:
-        region = list(WATSONX_URLS.keys())[int(choice) - 1]
-    except (IndexError, ValueError):
-        raise ValueError("Invalid region selection. Please restart and select a valid option.")
+# Set the Watsonx URL based on the selected region
+WATSONX_URL = f"{WATSONX_URLS.get(region)}/ml/v1/text/generation?version=2023-05-29"
 
 
 # IBM Cloud IAM URL for fetching the token
@@ -95,6 +112,89 @@ def get_iam_token():
         logger.error(f"Error fetching IAM token: {err}")
         raise HTTPException(status_code=500, detail=f"Error fetching IAM token: {err}")
 
+def format_debug_output(request_data):
+    headers = ["by API", "Parameter", "API Value", "Default Value", "Explanation"]
+    table = []
+
+    # Define the parameters excluding "Prompt" and add explanations
+    parameters = [
+        ("Model ID", request_data.get("model", "llama-3-405b-instruct"), "llama-3-405b-instruct", 
+        "ID of the model to use for completion"),
+        
+        ("Max Tokens", request_data.get("max_tokens", 2000), 2000, 
+        "Maximum number of tokens to generate in the completion. The total tokens, prompt + completion."),
+        
+        ("Temperature", request_data.get("temperature", 0.2), 0.2, 
+        "Controls the randomness of the generated output. Higher values make the output more random."),
+        
+        ("Presence Penalty", request_data.get("presence_penalty", 1), 1, 
+        "Penalizes new tokens based on whether they appear in the text so far. Positive values encourage the model to talk about new topics."),
+        
+        ("Frequency Penalty", request_data.get("frequency_penalty", 1), 1, 
+        "Penalizes new tokens based on their frequency in the text so far. Reduces the likelihood of the model repeating the same lines."),
+        
+        ("top_p", request_data.get("top_p", 1), 1, 
+        "Nucleus sampling parameter. For example, top_p = 0.1 means the model will consider only the top 10% probability tokens."),
+        
+        ("best_of", request_data.get("best_of", 1), 1, 
+        "Generates multiple completions server-side, returning the 'best' one (the one with the highest log probability)."),
+        
+        ("echo", request_data.get("echo", False), False, 
+        "If set to True, echoes the prompt back along with the completion. Useful for debugging purposes."),
+        
+        ("n", request_data.get("n", 1), 1, 
+        "Number of completions to generate for each prompt. Note that this can quickly consume your token quota."),
+        
+        ("seed", request_data.get("seed", None), None, 
+        "If specified, ensures deterministic outputs, meaning repeated requests with the same seed and parameters should return the same result."),
+        
+        ("stop", request_data.get("stop", None), None, 
+        "Up to 4 sequences where the model will stop generating further tokens. The generated text will not contain the stop sequence."),
+        
+        ("logit_bias", request_data.get("logit_bias", None), None, 
+        "A JSON object that adjusts the likelihood of specified tokens appearing in the completion. Maps token IDs to a bias value from -100 to 100."),
+        
+        ("logprobs", request_data.get("logprobs", None), None, 
+        "Includes the log probabilities on the logprobs most likely tokens, as well as the chosen tokens. Useful for analyzing the model's decision process."),
+        
+        ("stream", request_data.get("stream", False), False, 
+        "If set to True, streams back partial progress as the model generates tokens in real-time."),
+        
+        ("suffix", request_data.get("suffix", None), None, 
+        "Specifies a suffix that comes after the generated text. Useful for inserting text after a completion.")
+    ]
+
+
+    # ANSI escape codes for colors
+    green = "\033[92m"
+    yellow = "\033[93m"
+    reset = "\033[0m"
+
+    for param, api_value, default_value, explanation in parameters:
+        # Determine if the parameter was provided by the API (yellow) or using default (green)
+        if api_value != default_value:
+            # Use yellow for rows where the API value differs from the default
+            color = yellow
+            provided_by_api = f"{yellow}X{reset}"
+        else:
+            # Use green for rows with default values
+            color = green
+            provided_by_api = ""
+
+        # Append the row with color applied to the entire line
+        table.append([
+            provided_by_api,  # First column: Provided by API
+            f"{color}{param}{reset}", 
+            f"{color}\"{api_value}\"{reset}" if isinstance(api_value, str) else f"{color}{api_value}{reset}", 
+            f"{color}{default_value}{reset}", 
+            f"{color}{explanation}{reset}"
+        ])
+
+    # Align the "Provided by API" and "Parameter" columns to the left, as well as "Explanation"
+    return tabulate(table, headers, tablefmt="pretty", colalign=("center", "left", "center", "center", "left"))
+
+
+
 # Route to handle Watsonx-compatible requests
 @app.post("/v1/completions")
 async def watsonx_completions(request: Request):
@@ -102,34 +202,55 @@ async def watsonx_completions(request: Request):
 
     request_data = await request.json()
 
-    # Extract parameters from request
+
+    # Extract parameters from request, or set default values if not provided
     prompt = request_data.get("prompt", "")
+    model_id = request_data.get("model", "llama-3-405b-instruct")  # Default model_id
     max_tokens = request_data.get("max_tokens", 2000)
     temperature = request_data.get("temperature", 0.2)
-    model_id = request_data.get("model", "mistralai/mistral-large")  # Default model_id if not provided
+    best_of = request_data.get("best_of", 1)
+    n = request_data.get("n", 1)
     presence_penalty = request_data.get("presence_penalty", 1)
+    #frequency_penalty = request_data.get("frequency_penalty", 0)
+    echo = request_data.get("echo", False)
+    logit_bias = request_data.get("logit_bias", None)
+    logprobs = request_data.get("logprobs", None)
+    #stop = request_data.get("stop", [])
+    suffix = request_data.get("suffix", None)
+    stream = request_data.get("stream", False)
+    seed = request_data.get("seed", None)
+    top_p = request_data.get("top_p", 1)
 
-    logger.debug(f"Prompt: {prompt[:200]}..., Max Tokens: {max_tokens}, Temperature: {temperature}, Model ID: {model_id}")
+    # Debugging information: Check if parameters are given by API or use defaults
+    logger.debug("Parameter source debug:")
+    logger.debug("\n" + format_debug_output(request_data))
 
     # Get IBM IAM token
     iam_token = get_iam_token()
 
     # Prepare Watsonx.ai request payload with HAP disabled
     watsonx_payload = {
-        "input": prompt,
+        "input": prompt,  # Ensure 'prompt' does not have extra single quotes around it
         "parameters": {
-            "decoding_method": "sample",
+            "decoding_method": "sample", # decoding_method = Greedy is not supported.
             "max_new_tokens": max_tokens,
             "temperature": temperature,
             "top_k": 50,
-            "top_p": 1,
+            "top_p": top_p,
+            "random_seed": seed,
+            #"stop_sequences": stop,
             "repetition_penalty": presence_penalty
+            #"frequency_penalty": frequency_penalty
         },
         "model_id": model_id,
         "project_id": PROJECT_ID
     }
 
-    logger.debug(f"Sending request to Watsonx.ai: {json.dumps(watsonx_payload, indent=4)}")
+    # Properly escape and format special characters using json.dumps
+    formatted_payload = json.dumps(watsonx_payload, indent=4, ensure_ascii=False)
+
+    # Log the prettified JSON with escaped characters
+    logger.debug(f"Sending request to Watsonx.ai: {formatted_payload}")
 
     headers = {
         "Authorization": f"Bearer {iam_token}",
@@ -143,14 +264,14 @@ async def watsonx_completions(request: Request):
         watsonx_data = response.json()
         logger.debug(f"Received response from Watsonx.ai: {json.dumps(watsonx_data, indent=4)}")
     except requests.exceptions.RequestException as err:
-        logger.error(f"Error calling Watsonx.ai: {err}")
+        logger.error(f"Error: calling Watsonx.ai: {err}")
         raise HTTPException(status_code=500, detail=f"Error calling Watsonx.ai: {err}")
 
     # Extract the generated text from the Watsonx response
     results = watsonx_data.get("results", [])
     if results and "generated_text" in results[0]:
         generated_text = results[0]["generated_text"]
-        logger.debug(f"Generated text from Watsonx.ai: {generated_text}")
+        logger.debug(f"Generated text from Watsonx.ai: \n{generated_text}")
     else:
         generated_text = "\n\nNo response available."
         logger.warning("No generated text found in Watsonx.ai response.")
@@ -160,7 +281,7 @@ async def watsonx_completions(request: Request):
         "id": f"cmpl-{str(uuid.uuid4())[:12]}",
         "object": "text_completion",
         "created": int(time.time()),
-        "model": "llama-3-405b-instruct",  # or whatever model name you'd prefer
+        "model": model_id,
         "system_fingerprint": f"fp_{str(uuid.uuid4())[:12]}",
         "choices": [
             {
