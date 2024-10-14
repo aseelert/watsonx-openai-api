@@ -16,12 +16,38 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# Mapping of each region to URL
+WATSONX_URLS = {
+    "us-south": "https://us-south.ml.cloud.ibm.com",
+    "eu-gb": "https://eu-gb.ml.cloud.ibm.com",
+    "jp-tok": "https://jp-tok.ml.cloud.ibm.com",
+    "eu-de": "https://eu-de.ml.cloud.ibm.com"
+}
+
+# Get region from env variable
+region = os.getenv("WATSONX_REGION")
+
+# If no region var is set, ask user to input it
+if not region:
+    print("Please select a region:")
+    for idx, reg in enumerate(WATSONX_URLS.keys(), start=1):
+        print(f"{idx}. {reg}")
+    
+    # Get user input and validate
+    choice = input("Enter the number corresponding to your region: ")
+    
+    try:
+        region = list(WATSONX_URLS.keys())[int(choice) - 1]
+    except (IndexError, ValueError):
+        raise ValueError("Invalid region selection. Please restart and select a valid option.")
+
+
 # IBM Cloud IAM URL for fetching the token
 IAM_TOKEN_URL = "https://iam.cloud.ibm.com/identity/token"
 
 # Load IBM API key, Watsonx URL, and Project ID from environment variables
 IBM_API_KEY = os.getenv("WATSONX_IAM_APIKEY")
-WATSONX_URL = "https://us-south.ml.cloud.ibm.com/ml/v1/text/generation?version=2023-05-29"
+WATSONX_URL = f"{WATSONX_URLS.get(region)}/ml/v1/text/generation?version=2023-05-29"
 PROJECT_ID = os.getenv("WATSONX_PROJECT_ID")
 
 if not IBM_API_KEY:
