@@ -8,7 +8,7 @@ WORKDIR /app
 COPY watsonxai-endpoint.py /app/watsonxai-endpoint.py
 
 # Install any needed packages
-RUN pip install --no-cache-dir fastapi uvicorn requests
+RUN pip install --no-cache-dir fastapi uvicorn requests tabulate
 
 # Make port 8000 available to the world outside this container
 EXPOSE 8000
