@@ -8,4 +8,4 @@ services:
       - WATSONX_REGION=${WATSONX_REGION}
     ports:
       - "8080:8000"
-    restart: unless-stopped
+    restart: allways
