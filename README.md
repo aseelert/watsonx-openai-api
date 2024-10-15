@@ -83,7 +83,7 @@ pip install --upgrade pip
 
 **install pip packages:**
 ```bash
-pip install --no-cache-dir fastapi uvicorn requests streamlit
+pip install --no-cache-dir fastapi uvicorn requests streamlit tabulate
 ```
 
 ### Required Environment Variables
