@@ -205,7 +205,7 @@ async def watsonx_completions(request: Request):
 
     # Extract parameters from request, or set default values if not provided
     prompt = request_data.get("prompt", "")
-    model_id = request_data.get("model", "llama-3-405b-instruct")  # Default model_id
+    model_id = request_data.get("model", "meta-llama/llama-3-405b-instruct")  # Default model_id
     max_tokens = request_data.get("max_tokens", 2000)
     temperature = request_data.get("temperature", 0.2)
     best_of = request_data.get("best_of", 1)
