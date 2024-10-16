@@ -73,19 +73,6 @@ Before running this application, you need to set the following environment varia
 - Your watsonx.ai project has a Watson Machine Learning instance associated, which is required to manage machine learning models.
 - If instructlab data generation will be use, we assume ilab is already installed.
 
-**install python 3.11 venv:**
-```bash
-sudo dnf -y install python3.11 python3.11-devel jq
-python3.11 -m venv venv
-source ~/watsonx-openai-api/venv/bin/activate
-pip install --upgrade pip
-```
-
-**install pip packages:**
-```bash
-pip install --no-cache-dir fastapi uvicorn requests streamlit tabulate
-```
-
 ### Required Environment Variables
 
 - **`WATSONX_IAM_APIKEY`**: The IBM API key required to authenticate with watsonx.ai.
@@ -109,6 +96,19 @@ An explanation how to set them is given in the respective sections.
 <summary><b>Run local (Interactive mode)</b></summary>
 
 If running interactively, use `uvicorn` to start the FastAPI application after setting the environment variables:
+
+**install python 3.11 venv:**
+```bash
+sudo dnf -y install python3.11 python3.11-devel jq
+python3.11 -m venv venv
+source ~/watsonx-openai-api/venv/bin/activate
+pip install --upgrade pip
+```
+
+**install pip packages:**
+```bash
+pip install --no-cache-dir fastapi uvicorn requests streamlit tabulate
+```
 
 ```bash
 cd fastapi-watsonx
