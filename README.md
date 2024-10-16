@@ -259,8 +259,10 @@ import pandas as pd
 from ibm_watsonx_ai import APIClient, Credentials
 
 IBM_API_KEY = os.getenv("WATSONX_IAM_APIKEY")
+WATSONX_REGION  = os.getenv("WATSONX_REGION")
+
 credentials = Credentials(
-    url="https://us-south.ml.cloud.ibm.com",
+    url=f"https://{WATSONX_REGION}.ml.cloud.ibm.com", 
     api_key=IBM_API_KEY,
 )
 api_client = APIClient(credentials)
