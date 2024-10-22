@@ -198,7 +198,7 @@ ilab data generate \
 --output-dir ./outputdir-watsonxai-endpoint \
 --chunk-word-count 1000 \
 --num-cpus 8 \
---model mistralai/mistral-large
+--model ibm/granite-20b-multilingual
 ```
 
 
