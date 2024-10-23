@@ -1,5 +1,5 @@
 # Use an official Python runtime as a parent image
-FROM python:3.10-slim
+FROM python:3.11-slim
 
 # Set the working directory in the container
 WORKDIR /app
@@ -8,7 +8,7 @@ WORKDIR /app
 COPY watsonxai-endpoint.py /app/watsonxai-endpoint.py
 
 # Install any needed packages
-RUN pip install --no-cache-dir fastapi uvicorn requests tabulate
+RUN pip install --no-cache-dir fastapi uvicorn requests tabulate ibm_watsonx_ai
 
 # Make port 8000 available to the world outside this container
 EXPOSE 8000
@@ -17,6 +17,7 @@ EXPOSE 8000
 ENV WATSONX_IAM_APIKEY=""
 ENV WATSONX_PROJECT_ID=""
 ENV WATSONX_REGION=""
+ENV WATSONX_VERSION=""
 
 # Define environment variable for Python to avoid buffering
 ENV PYTHONUNBUFFERED=1
