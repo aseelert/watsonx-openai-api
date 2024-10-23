@@ -3,3 +3,4 @@ uvicorn
 requests
 streamlit
 tabulate
+ibm_watsonx_ai
