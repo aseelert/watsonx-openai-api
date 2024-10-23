@@ -1,6 +1,6 @@
 services:
   watsonxai-endpoint:
-    image: aseelert/watsonxai-endpoint:1.0
+    image: aseelert/watsonxai-endpoint:1.1
     container_name: watsonxai-endpoint
     environment:
       - WATSONX_IAM_APIKEY=${WATSONX_IAM_APIKEY}
