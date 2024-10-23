@@ -6,7 +6,6 @@ services:
       - WATSONX_IAM_APIKEY=${WATSONX_IAM_APIKEY}
       - WATSONX_PROJECT_ID=${WATSONX_PROJECT_ID}
       - WATSONX_REGION=${WATSONX_REGION}
-      - WATSONX_VERSION={WATSONX_VERSION}
     ports:
       - "8080:8000"
     restart: always
