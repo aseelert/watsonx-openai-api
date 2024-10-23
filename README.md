@@ -131,7 +131,7 @@ docker run -d -p 8080:8000 --name watsonxai-endpoint \
 -e WATSONX_IAM_APIKEY=${WATSONX_IAM_APIKEY} \
 -e WATSONX_PROJECT_ID=${WATSONX_PROJECT_ID} \
 -e WATSONX_REGION=${WATSONX_REGION} \
-aseelert/watsonxai-endpoint:1.0
+aseelert/watsonxai-endpoint:1.1
 ```
 
 **2. Activate live logs**
@@ -147,7 +147,7 @@ docker logs -f watsonxai-endpoint
 **1. Build a local docker image**
 ```bash
 cd fastapi-watsonx
-docker build -t watsonxai-endpoint:1.0 .
+docker build -t watsonxai-endpoint:1.1 .
 ```
 
 **2. Execute Docker with local image and IBM Variables**
@@ -159,7 +159,7 @@ docker run -d -p 8080:8000 --name watsonxai-endpoint \
 -e WATSONX_IAM_APIKEY=${WATSONX_IAM_APIKEY} \
 -e WATSONX_PROJECT_ID=${WATSONX_PROJECT_ID} \
 -e WATSONX_REGION=${WATSONX_REGION} \
-watsonxai-endpoint:1.0
+watsonxai-endpoint:1.1
 ```
 
 **3. Activate live logs**
@@ -250,21 +250,61 @@ This gateway ensures compatibility between legacy applications and watsonx.ai, p
 
 ### Appendix
 Get the current list of LLMs of Saas watsonx.ai instance
+
 ```bash
-pip install ibm_watsonx_ai
+curl -X GET http://localhost:8130/v1/models | jq
 ```
-```python
-import os
-import pandas as pd
-from ibm_watsonx_ai import APIClient, Credentials
 
-IBM_API_KEY = os.getenv("WATSONX_IAM_APIKEY")
-WATSONX_REGION  = os.getenv("WATSONX_REGION")
-
-credentials = Credentials(
-    url=f"https://{WATSONX_REGION}.ml.cloud.ibm.com", 
-    api_key=IBM_API_KEY,
-)
-api_client = APIClient(credentials)
-models = api_client.foundation_models.TextModels.show()
+```json
+{
+  "data": [
+    {
+      "id": "bigscience/mt0-xxl",
+      "object": "model",
+      "created": 1729690580,
+      "owned_by": "BigScience / Hugging Face",
+      "description": "An instruction-tuned iteration on mT5. Supports tasks like question_answering, summarization, classification, generation.",
+      "max_tokens": 4095,
+      "token_limits": {
+        "max_sequence_length": 4096,
+        "max_output_tokens": 4095
+      }
+    },
+    {
+      "id": "codellama/codellama-34b-instruct-hf",
+      "object": "model",
+      "created": 1729690580,
+      "owned_by": "Code Llama / Hugging Face",
+      "description": "Code Llama is an AI model built on top of Llama 2, fine-tuned for generating and discussing code. Supports tasks like code.",
+      "max_tokens": 8192,
+      "token_limits": {
+        "max_sequence_length": 16384,
+        "max_output_tokens": 8192
+      }
+    },
+    {
+      "id": "google/flan-t5-xl",
+      "object": "model",
+      "created": 1729690580,
+      "owned_by": "Google / Hugging Face",
+      "description": "A pretrained T5 - an encoder-decoder model pre-trained on a mixture of supervised / unsupervised tasks converted into a text-to-text format. Supports tasks like question_answering, summarization, retrieval_augmented_generation, classification, generation, extraction.",
+      "max_tokens": 4095,
+      "token_limits": {
+        "max_sequence_length": 4096,
+        "max_output_tokens": 4095
+      }
+    },
+    {
+      "id": "google/flan-t5-xxl",
+      "object": "model",
+      "created": 1729690580,
+      "owned_by": "Google / Hugging Face",
+      "description": "flan-t5-xxl is an 11 billion parameter model based on the Flan-T5 family. Supports tasks like question_answering, summarization, retrieval_augmented_generation, classification, generation, extraction.",
+      "max_tokens": 4095,
+      "token_limits": {
+        "max_sequence_length": 4096,
+        "max_output_tokens": 4095
+      }
+    },
+......
 ```
