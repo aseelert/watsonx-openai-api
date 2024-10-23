@@ -252,7 +252,7 @@ This gateway ensures compatibility between legacy applications and watsonx.ai, p
 Get the current list of LLMs of Saas watsonx.ai instance
 
 ```bash
-curl -X GET http://localhost:8130/v1/models | jq
+curl -X GET http://localhost:8080/v1/models | jq
 ```
 
 ```json
