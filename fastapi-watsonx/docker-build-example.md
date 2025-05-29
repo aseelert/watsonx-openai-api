@@ -13,3 +13,10 @@ docker push aseelert/watsonxai-endpoint:1.1-arm64
 docker manifest create aseelert/watsonxai-endpoint:1.1 aseelert/watsonxai-endpoint:1.1-arm64 aseelert/watsonxai-endpoint:1.1-amd64 --amend
 docker manifest push aseelert/watsonxai-endpoint:1.1
 ```
+
+
+Local build
+```bash
+docker build --no-cache -t fastapi-watsonx .
+docker run -d --env-file=.env -p 8000:8000 fastapi-watsonx
+```

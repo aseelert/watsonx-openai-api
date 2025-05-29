@@ -30,6 +30,9 @@ valid_regions = ["us-south", "eu-gb", "jp-tok", "eu-de"]
 region = os.getenv("WATSONX_REGION")
 
 api_version = os.getenv("WATSONX_VERSION") or "2023-05-29"
+on_prem = os.getenv("WATSONX_ON_PREM")
+cpd_url = os.getenv("CPD_URL")
+
 
 # Handle behavior based on environment (Docker vs. Interactive mode)
 if not region or region not in valid_regions:
@@ -64,14 +67,22 @@ WATSONX_URLS = {
 # IBM Cloud IAM URL for fetching the token
 IAM_TOKEN_URL = "https://iam.cloud.ibm.com/identity/token"
 
+# Token url for ON_PREM
+if on_prem == "1":
+    CPD_AUTH_URL = f"{cpd_url}/icp4d-api/v1/authorize"
+    USERNAME = os.getenv("USERNAME")
+    WATSONX_MODELS_URL = f"{cpd_url}/ml/v1/foundation_model_specs"
+    WATSONX_URL = f"{cpd_url}/ml/v1/text/generation?version={api_version}"
+    WATSONX_URL_CHAT = f"{cpd_url}/ml/v1/text/chat?version={api_version}"      
+else:
+    WATSONX_MODELS_URL = f"{WATSONX_URLS.get(region)}/ml/v1/foundation_model_specs"
+    # Construct Watsonx URLs with the version parameter
+    WATSONX_URL = f"{WATSONX_URLS.get(region)}/ml/v1/text/generation?version={api_version}"
+    WATSONX_URL_CHAT = f"{WATSONX_URLS.get(region)}/ml/v1/text/chat?version={api_version}"  
+
 # Load IBM API key, Watsonx URL, and Project ID from environment variables
 IBM_API_KEY = os.getenv("WATSONX_IAM_APIKEY")
-WATSONX_MODELS_URL = f"{WATSONX_URLS.get(region)}/ml/v1/foundation_model_specs"
 PROJECT_ID = os.getenv("WATSONX_PROJECT_ID")
-
-# Construct Watsonx URLs with the version parameter
-WATSONX_URL = f"{WATSONX_URLS.get(region)}/ml/v1/text/generation?version={api_version}"
-WATSONX_URL_CHAT = f"{WATSONX_URLS.get(region)}/ml/v1/text/chat?version={api_version}"
 
 if not IBM_API_KEY:
     logger.error("IBM API key is not set. Please set the WATSONX_IAM_APIKEY environment variable.")
@@ -117,6 +128,43 @@ def get_iam_token():
     except requests.exceptions.RequestException as err:
         logger.error(f"Error fetching IAM token: {err}")
         raise HTTPException(status_code=500, detail=f"Error fetching IAM token: {err}")
+
+# Function to fetch the IAM token
+def get_onprem_token():
+    global cached_token, token_expiration
+    current_time = time.time()
+
+    if cached_token and current_time < token_expiration:
+        logger.debug("Using cached IAM token.")
+        return cached_token
+
+    logger.debug("Fetching new token from CPD...")
+
+    try:
+        response = requests.post(
+            CPD_AUTH_URL,
+            headers={"Content-Type": "application/json"},
+            json={
+                "username": f"{USERNAME}",
+                "api_key": f"{IBM_API_KEY}",
+            },
+        )
+        response.raise_for_status()
+        token_data = response.json()
+        cached_token = token_data["token"]
+        # expiers in 1h - TODO caching
+        #expires_in = token_data["expires_in"]
+
+        token_expiration = current_time + 3600 - 60
+        time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(token_expiration))
+        logger.debug(f"token fetched, expires at {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(token_expiration))} seconds.")
+
+        return cached_token
+    except requests.exceptions.RequestException as err:
+        logger.error(f"Error fetching  token: {err}")
+        raise HTTPException(status_code=500, detail=f"Error fetching  token: {err}")
+
+
 
 def format_debug_output(request_data):
     headers = ["by API", "Parameter", "API Value", "Default Value", "Explanation"]
@@ -196,11 +244,22 @@ def format_debug_output(request_data):
     # Align the "Provided by API" and "Parameter" columns to the left, as well as "Explanation"
     return tabulate(table, headers, tablefmt="pretty", colalign=("center", "left", "center", "center", "left"))
 
+# get token
+def get_watsonx_token():
+    logger.info(f"On prem value: {on_prem} calculated {on_prem==1}")
+    if on_prem == "1":
+        logger.info("Getting get_onprem_token")
+        token = get_onprem_token()
+    else:
+        logger.info("Getting get_iam_token")
+        token = get_iam_token()    
+    return token
 
 # Fetch the models from Watsonx
 def get_watsonx_models():
     try:
-        token = get_iam_token()
+        token = get_watsonx_token()
+
         headers = {
             "Authorization": f"Bearer {token}",
             "Content-Type": "application/json",
@@ -326,7 +385,7 @@ async def watsonx_completions(request: Request):
         raise HTTPException(status_code=400, detail="Invalid type for 'prompt'. Expected a string or list of strings.")
 
     # Rest of the parameters (model_id, max_tokens, etc.)
-    model_id = request_data.get("model", "ibm/granite-20b-multilingual")  # Default model_id
+    model_id = request_data.get("model", "ibm/granite-3-8b-instruct")  # Default model_id
     max_tokens = request_data.get("max_tokens", 2000)
     temperature = request_data.get("temperature", 0.2)
     best_of = request_data.get("best_of", 1)
@@ -346,7 +405,9 @@ async def watsonx_completions(request: Request):
     logger.debug("\n" + format_debug_output(request_data))
 
     # Get the IAM token
-    iam_token = get_iam_token()
+    iam_token = get_watsonx_token()
+    logger.debug("Bearer token:\n")
+    logger.debug(iam_token)
 
     # Prepare Watsonx.ai request payload
     watsonx_payload = {

@@ -1,0 +1,5 @@
+fastapi
+uvicorn
+requests
+tabulate
+ibm_watsonx_ai
