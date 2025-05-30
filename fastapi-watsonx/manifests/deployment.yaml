@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: fastapi-watsonx-container
-        image: fastapi-watsonx
+        image: quay.io/gas_stocktrader/fastapi-watsonx
         ports:
         - containerPort: 8000
         envFrom:
