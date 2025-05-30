@@ -491,3 +491,91 @@ async def watsonx_completions(request: Request):
     # Return the response
     logger.debug(f"Returning OpenAI-compatible response: {json.dumps(openai_response, indent=4)}")
     return openai_response
+
+@app.post("/v1/chat/completions")
+async def watsonx_chat_completions(request: Request):
+    logger.info("Received a Watsonx completion request.")
+
+    # Parse the incoming request as JSON
+    try:
+        request_data = await request.json()
+        logger.debug(f"Received request data: {json.dumps(request_data, indent=4)}")
+    except Exception as e:
+        logger.error(f"Error parsing request: {e}")
+        raise HTTPException(
+            status_code=400, detail="Invalid JSON request body")
+
+    # Rest of the parameters (model_id, max_tokens, etc.)
+    model_id = request_data.get(
+        "model", "ibm/granite-3-8b-instruct")  # Default model_id
+    max_tokens = request_data.get("max_tokens", 1024)
+    temperature = request_data.get("temperature", 1)
+    n = request_data.get("n", 1)
+    logit_bias = request_data.get("logit_bias", None)
+    logprobs = request_data.get("logprobs", False)
+    stop = request_data.get("stop", None)
+    seed = request_data.get("seed", None)
+    top_p = request_data.get("top_p", 1)
+    messages = request_data.get("messages", "")
+    frequency_penalty = request_data.get("frequency_penalty", 0)
+    presence_penalty = request_data.get("presence_penalty", 0)
+
+    # Debugging: Log the provided parameters and their sources
+    logger.debug("Parameter source debug:")
+    logger.debug("\n" + format_debug_output(request_data))
+
+    # Get the IAM token
+    iam_token = get_watsonx_token()
+
+    # Prepare Watsonx.ai request payload
+    watsonx_payload = {
+        "messages": messages,
+        "max_tokens": max_tokens,
+        "temperature": temperature,
+        "top_p": top_p,
+        "frequency_penalty": frequency_penalty,
+        "presence_penalty": presence_penalty,
+        "model_id": model_id,
+        "project_id": PROJECT_ID,
+        "n": n,
+        "seed": seed,
+        "logprobs": logprobs
+    }
+
+    # Optionally add optional parameters if provided
+    if stop:
+        watsonx_payload["stop"] = stop
+    if logit_bias:
+        watsonx_payload["parameters"]["logit_bias"] = logit_bias
+
+    # Log the prettified JSON request
+    formatted_payload = json.dumps(
+        watsonx_payload, indent=4, ensure_ascii=False)
+    logger.debug(f"Sending request to Watsonx.ai: {formatted_payload}")
+
+    headers = {
+        "Authorization": f"Bearer {iam_token}",
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+    }
+
+    try:
+        # Send the request to Watsonx.ai
+        response = requests.post(
+            WATSONX_URL_CHAT, json=watsonx_payload, headers=headers)
+        response.raise_for_status()  # This will raise an HTTPError for 4xx/5xx responses
+        watsonx_data = response.json()
+        logger.debug(f"Received response from Watsonx.ai: {json.dumps(watsonx_data, indent=4)}")
+    except requests.exceptions.HTTPError as err:
+        # Capture and log the full response from Watsonx.ai
+        error_message = response.text  # Watsonx should return a more detailed error message
+        logger.error(f"HTTPError: {err}, Response: {error_message}")
+        raise HTTPException(status_code=response.status_code,
+                            detail=f"Error from Watsonx.ai: {error_message}")
+    except requests.exceptions.RequestException as err:
+        # Generic request exception handling
+        logger.error(f"RequestException: {err}")
+        raise HTTPException(
+            status_code=500, detail=f"Error calling Watsonx.ai: {err}")
+
+    return watsonx_data
