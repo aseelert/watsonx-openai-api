@@ -18,5 +18,7 @@ docker manifest push aseelert/watsonxai-endpoint:1.1
 Local build
 ```bash
 docker build --no-cache -t fastapi-watsonx .
-docker run -d --env-file=.env -p 8000:8000 fastapi-watsonx
+docker tag fastapi-watsonx quay.io/gas_stocktrader/fastapi-watsonx:latest
+docker push quay.io/gas_stocktrader/fastapi-watsonx:latest
+docker run -d --rm --env-file=.env -p 8000:8000 fastapi-watsonx
 ```

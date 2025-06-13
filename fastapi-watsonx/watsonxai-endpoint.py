@@ -1,3 +1,4 @@
+import traceback
 from fastapi import FastAPI, Request, HTTPException
 import requests
 import os
@@ -73,7 +74,8 @@ if on_prem == "1":
     USERNAME = os.getenv("USERNAME")
     WATSONX_MODELS_URL = f"{cpd_url}/ml/v1/foundation_model_specs"
     WATSONX_URL = f"{cpd_url}/ml/v1/text/generation?version={api_version}"
-    WATSONX_URL_CHAT = f"{cpd_url}/ml/v1/text/chat?version={api_version}"      
+    WATSONX_URL_CHAT = f"{cpd_url}/ml/v1/text/chat?version={api_version}"
+    WATSONX_CUSTOM_MODELS_URL = f"{cpd_url}/ml/v4/custom_foundation_models?version=2024-05-01"      
 else:
     WATSONX_MODELS_URL = f"{WATSONX_URLS.get(region)}/ml/v1/foundation_model_specs"
     # Construct Watsonx URLs with the version parameter
@@ -148,6 +150,7 @@ def get_onprem_token():
                 "username": f"{USERNAME}",
                 "api_key": f"{IBM_API_KEY}",
             },
+            verify=False
         )
         response.raise_for_status()
         token_data = response.json()
@@ -275,7 +278,8 @@ def get_watsonx_models():
         response = requests.get(
             WATSONX_MODELS_URL,
             headers=headers,
-            params=params
+            params=params,
+            verify=False
         )
 
         if response.status_code == 404:
@@ -284,6 +288,30 @@ def get_watsonx_models():
 
         response.raise_for_status()  # Raise exception for any non-200 status codes
         models_data = response.json()
+
+        logger.debug(f"Count models: {models_data['total_count']}")
+
+        # get custom models
+        response = requests.get(
+            WATSONX_CUSTOM_MODELS_URL,
+            headers=headers,
+            verify=False
+        )
+
+        if response.status_code == 404:
+            logger.error("404 Not Found: The endpoint or version might be incorrect.")
+            raise HTTPException(status_code=404, detail="Watsonx Models API endpoint not found.")
+
+        response.raise_for_status()  # Raise exception for any non-200 status codes
+        custom_models_data = response.json()
+
+        logger.debug(f"Count custom models: {custom_models_data['total_count']}")
+
+        models_data["total_count"] = models_data["total_count"] + custom_models_data["total_count"]
+        models_data["resources"] = models_data["resources"] + custom_models_data["resources"]
+
+        logger.debug(f"Combined models: {models_data}")
+
         return models_data
     except requests.exceptions.RequestException as err:
         logger.error(f"Error fetching models from Watsonx.ai: {err}")
@@ -328,6 +356,7 @@ async def fetch_models():
         return openai_like_models
     except Exception as err:
         logger.error(f"Error fetching models: {err}")
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Error fetching models: {err}")
 
 # FastAPI route for /v1/models/{model_id}
@@ -443,7 +472,7 @@ async def watsonx_completions(request: Request):
 
     try:
         # Send the request to Watsonx.ai
-        response = requests.post(WATSONX_URL, json=watsonx_payload, headers=headers)
+        response = requests.post(WATSONX_URL, json=watsonx_payload, headers=headers, verify=False)
         response.raise_for_status()  # This will raise an HTTPError for 4xx/5xx responses
         watsonx_data = response.json()
         logger.debug(f"Received response from Watsonx.ai: {json.dumps(watsonx_data, indent=4)}")
@@ -562,7 +591,7 @@ async def watsonx_chat_completions(request: Request):
     try:
         # Send the request to Watsonx.ai
         response = requests.post(
-            WATSONX_URL_CHAT, json=watsonx_payload, headers=headers)
+            WATSONX_URL_CHAT, json=watsonx_payload, headers=headers, verify=False)
         response.raise_for_status()  # This will raise an HTTPError for 4xx/5xx responses
         watsonx_data = response.json()
         logger.debug(f"Received response from Watsonx.ai: {json.dumps(watsonx_data, indent=4)}")

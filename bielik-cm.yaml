@@ -1,0 +1,150 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  finalizers:
+  - watsonxaiifm.cpd.ibm.com/finalizer
+  labels:
+    syom: watsonxaiifm_extra_models_config
+  name: speakleash-bielik-11b-v2-3-instruct
+  namespace: cpd
+data:
+  model: |
+    speakleash_bielik_11b_v2_3_instruct:
+      pvc_name: bielik-11b
+      pvc_size: 50Gi
+      command: []
+      isvc_yaml_name: isvc.yaml.j2
+      dir_name: model
+      force_apply: no
+      serving_runtime: vllm-serving-runtime
+      storage_uri: pvc://bielik-11b/
+      env:
+        - name: MODEL_NAME
+          value: /mnt/models
+        - name: CUDA_VISIBLE_DEVICES
+          value: "0" # if sharding, change to the value of shard. If sharding in 2, specify "0,1". If sharding in 4, specify "0,1,2,3".
+        - name: TRANSFORMERS_CACHE
+          value: /mnt/models/
+        - name: HUGGINGFACE_HUB_CACHE
+          value:  /mnt/models/
+        - name: DTYPE_STR
+          value: "float16"
+        - name: MAX_SEQUENCE_LENGTH
+          value: "4096"
+        - name: MAX_BATCH_SIZE
+          value: "256"
+        - name: MAX_CONCURRENT_REQUESTS
+          value: "256"
+        - name: MAX_NEW_TOKENS
+          value: "2048"
+        - name: DEPLOYMENT_FRAMEWORK
+          value: "tgis_native"
+        - name: HF_MODULES_CACHE
+          value: /tmp/huggingface/modules
+        - name: SERVED_MODEL_NAME
+          value: speakleash/bielik-11b-v2-3-instruct
+        - name: NUM_GPUS
+          value: "1"
+        - name: PORT
+          value: "3000"
+      volumeMounts:
+        - name: home
+          mountPath: /home/vllm
+        - name: tmp
+          mountPath: /tmp
+        - name: shm
+          mountPath: /dev/shm
+      volumes:
+        - name: home
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}
+        - name: shm
+          emptyDir:
+            medium: Memory
+            sizeLimit: 4Gi
+      annotations:
+        cloudpakId: 10e3de93-022b-4759-b2f9-2fc0668e1ba6
+        cloudpakName: IBM watsonx.ai
+        productChargedContainers: All
+        productCloudpakRatio: "1:1"
+        productID: 3a6d4448ec8342279494bc22e36bc318
+        productMetric: VIRTUAL_PROCESSOR_CORE
+        productName: IBM Watsonx.ai
+        productVersion: 10.2.0
+        cloudpakInstanceId: 8e131c88-2008-48a5-a6ad-c090d86a042b
+      labels_syom:
+        app.kubernetes.io/managed-by: ibm-cpd-watsonx-ai-ifm-operator
+        app.kubernetes.io/instance: watsonxaiifm
+        app.kubernetes.io/name: watsonxaiifm
+        icpdsupport/addOnId: watsonx_ai_ifm
+        icpdsupport/app: api
+        release: watsonxaiifm
+        icpdsupport/module: speakleash-bielik-11b-v2-3-instruct
+        app: text-speakleash-bielik-11b-v2-3-instruct
+        component: fmaas-inference-server # wont override value predictor
+        bam-placement: colocate
+        syom_model: speakleash--bielik-11b-v2.3-instruct
+      args: []
+      wx_inference_proxy:
+        speakleash/bielik-11b-v2-3-instruct:
+          global_custom_foundation_model: true
+          enabled:
+          - "true"
+          label: "bielik-11b-v2-3-instruct"
+          provider: "speakleash"
+          source: "Hugging Face"
+          functions:
+          - text_generation
+          - text_chat
+          tags:
+          - consumer_public
+          - bielik
+          # Description needs to be updated
+          short_description: "Bielik-11B-v2-3-Instruct is a generative text model featuring 11 billion parameters. "
+          long_description: "Bielik-11B-v2-3-Instruct is a generative text model featuring 11 billion parameters. "
+          task_ids:
+          - question_answering
+          - generation
+          - summarization
+          - classification
+          - extraction
+          tasks_info:
+            question_answering:
+              task_ratings:
+                quality: 0
+                cost: 0
+            generation:
+              task_ratings:
+                quality: 0
+                cost: 0
+            summarization:
+              task_ratings:
+                quality: 0
+                cost: 0
+            classification:
+              task_ratings:
+                quality: 0
+                cost: 0
+            extraction:
+              task_ratings:
+                quality: 0
+                cost: 0
+          min_shot_size: 1
+          tier: "class_2"
+          number_params: "11b"
+          lifecycle:
+            available:
+              since_version: "10.2.0"
+    speakleash_bielik_11b_v2_3_instruct_resources:
+      limits:
+        cpu: "2"
+        memory: 128Gi
+        nvidia.com/gpu: "1" # shard setting for the GPU (2,4,or 8)
+        ephemeral-storage: 1Gi
+      requests:
+        cpu: "1"
+        memory: 4Gi
+        nvidia.com/gpu: "1" # shard setting for the GPU (2,4,or 8)
+        ephemeral-storage: 10Mi
+    speakleash_bielik_11b_v2_3_instruct_replicas: 1
