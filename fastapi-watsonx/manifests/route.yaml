@@ -1,0 +1,13 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: fastapi-watsonx
+spec:
+  path: /
+  to:
+    kind: Service
+    name: fastapi-watsonx-service
+  port:
+    targetPort: 8000
+  tls:
+    termination: edge    

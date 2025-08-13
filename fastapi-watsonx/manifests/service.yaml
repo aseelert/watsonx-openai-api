@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: fastapi-watsonx-service
+spec:
+  selector:
+    app: fastapi-watsonx
+  ports:
+  - protocol: TCP
+    port: 8000
+    targetPort: 8000

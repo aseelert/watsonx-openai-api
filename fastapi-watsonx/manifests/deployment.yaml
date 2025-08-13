@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fastapi-watsonx
+  labels:
+    app: fastapi-watsonx
+spec:
+  selector:
+    matchLabels:
+      app: fastapi-watsonx
+  template:
+    metadata:
+      annotations:
+        alpha.image.policy.openshift.io/resolve-names: '*'    
+      labels:
+        app: fastapi-watsonx
+    spec:
+      containers:
+      - name: fastapi-watsonx-container
+        image: quay.io/gas_stocktrader/fastapi-watsonx
+        ports:
+        - containerPort: 8000
+        envFrom:
+          - secretRef:
+              name: fastapi-watsonx-secret   
