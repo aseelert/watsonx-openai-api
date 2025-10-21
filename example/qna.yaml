@@ -9,7 +9,7 @@ document:
   repo: https://github.com/aseelert/watsonx-openai-api
   commit: c8ef918890dbef7156713a2aa97d81689f9e6f8c
   patterns:
-    - watsonx_data.md
+    - example/watsonx_data.md
 
 seed_examples:
   - context: AstraDB integration and storage
