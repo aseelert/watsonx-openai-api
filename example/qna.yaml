@@ -1,0 +1,58 @@
+version: 3
+created_by: aseelert
+domain: technology
+document_outline: >
+  Overview of IBM watsonx.data (v2.2.1+), covering AstraDB, Milvus, Spark Gluten, Prestissimo,
+  Manta lineage integration, IKC Knowledge Catalog, Apache Ranger governance, and semantic layer.
+
+document:
+  repo: https://github.com/aseelert/watsonx-openai-api
+  commit: c8ef918890dbef7156713a2aa97d81689f9e6f8c
+  patterns:
+    - watsonx_data.md
+
+seed_examples:
+  - context: AstraDB integration and storage
+    questions_and_answers:
+      - question: What is AstraDB in watsonx.data?
+        answer: AstraDB is a managed, Cassandra-based distributed database. In watsonx.data Premium, it supports scalable structured storage and fast analytical queries.
+      - question: How is AstraDB connected to Cassandra?
+        answer: AstraDB builds directly on Apache Cassandra, offering compatibility and enhanced cloud-native management through watsonx.data integrations.
+      - question: How does AstraDB interact with Spark or Presto?
+        answer: It provides a unified JDBC/REST interface for analytical engines such as Spark, Prestissimo, and Milvus to query structured and vector data seamlessly.
+
+  - context: Milvus and vector management
+    questions_and_answers:
+      - question: What is Milvus in watsonx.data?
+        answer: Milvus serves as the vector database component, handling embeddings for AI and semantic search workloads.
+      - question: How does Milvus integrate with Spark Gluten and Prestissimo?
+        answer: Through vector-aware connectors, Milvus enables hybrid analytics that combine text embeddings with structured data queries.
+      - question: What benefits does Milvus bring to RAG use cases?
+        answer: It allows efficient vector retrieval for retrieval-augmented generation workflows integrated with watsonx.ai and watsonx.data.
+
+  - context: Governance and security
+    questions_and_answers:
+      - question: What is the role of Apache Ranger in watsonx.data?
+        answer: Apache Ranger provides unified access control and auditing across AstraDB, Milvus, Spark, and Presto within watsonx.data.
+      - question: How are governance policies managed in watsonx.data Premium?
+        answer: Policies are centrally defined in Ranger and integrated with IKC to enforce consistent access across all data and AI workloads.
+      - question: Can Ranger handle lineage and compliance?
+        answer: Ranger connects with Manta to support lineage-based policy enforcement and compliance tracking.
+
+  - context: Lineage and observability
+    questions_and_answers:
+      - question: What is Manta and how is it used in watsonx.data?
+        answer: Manta provides automated data lineage and impact analysis for watsonx.data components.
+      - question: How does Manta interact with Spark and Presto jobs?
+        answer: It tracks data movement and transformation across Spark Gluten and Prestissimo queries for transparency and compliance.
+      - question: How does lineage improve AI governance?
+        answer: Lineage ensures models and reports are traceable to original datasets, which is essential for regulatory and trust frameworks.
+
+  - context: Metadata and semantic layer
+    questions_and_answers:
+      - question: What is IKC in watsonx.data?
+        answer: IKC (IBM Knowledge Catalog) manages metadata, business terms, and access control rules across the watsonx ecosystem.
+      - question: What is the semantic layer in watsonx.data?
+        answer: The semantic layer provides a unified business view across structured and unstructured data, enabling consistent metrics and discovery.
+      - question: How does IKC integrate with Ranger and Manta?
+        answer: IKC shares lineage and policy data with Manta and Ranger, providing end-to-end governance and catalog visibility.
