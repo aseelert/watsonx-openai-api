@@ -81,7 +81,8 @@ else:
     WATSONX_MODELS_URL = f"{WATSONX_URLS.get(region)}/ml/v1/foundation_model_specs"
     # Construct Watsonx URLs with the version parameter
     WATSONX_URL = f"{WATSONX_URLS.get(region)}/ml/v1/text/generation?version={api_version}"
-    WATSONX_URL_CHAT = f"{WATSONX_URLS.get(region)}/ml/v1/text/chat?version={api_version}"  
+    WATSONX_URL_CHAT = f"{WATSONX_URLS.get(region)}/ml/v1/text/chat?version={api_version}"
+    WATSONX_CUSTOM_MODELS_URL = f"{WATSONX_URLS.get(region)}/ml/v4/custom_foundation_models?version=2024-05-01"
 
 # Load IBM API key, Watsonx URL, and Project ID from environment variables
 IBM_API_KEY = os.getenv("WATSONX_IAM_APIKEY")
@@ -292,24 +293,23 @@ def get_watsonx_models():
 
         logger.debug(f"Count models: {models_data['total_count']}")
 
-        # get custom models
-        response = requests.get(
-            WATSONX_CUSTOM_MODELS_URL,
-            headers=headers,
-            verify=False
-        )
-
-        if response.status_code == 404:
-            logger.error("404 Not Found: The endpoint or version might be incorrect.")
-            raise HTTPException(status_code=404, detail="Watsonx Models API endpoint not found.")
-
-        response.raise_for_status()  # Raise exception for any non-200 status codes
-        custom_models_data = response.json()
-
-        logger.debug(f"Count custom models: {custom_models_data['total_count']}")
-
-        models_data["total_count"] = models_data["total_count"] + custom_models_data["total_count"]
-        models_data["resources"] = models_data["resources"] + custom_models_data["resources"]
+        # get custom models (on-prem only; cloud returns 404 which is expected)
+        try:
+            response = requests.get(
+                WATSONX_CUSTOM_MODELS_URL,
+                headers=headers,
+                verify=False
+            )
+            if response.status_code == 404:
+                logger.debug("Custom models endpoint not available (404) — skipping.")
+            else:
+                response.raise_for_status()
+                custom_models_data = response.json()
+                logger.debug(f"Count custom models: {custom_models_data['total_count']}")
+                models_data["total_count"] = models_data["total_count"] + custom_models_data["total_count"]
+                models_data["resources"] = models_data["resources"] + custom_models_data["resources"]
+        except requests.exceptions.RequestException as err:
+            logger.warning(f"Could not fetch custom models (non-fatal): {err}")
 
         logger.debug(f"Combined models: {models_data}")
 
@@ -324,16 +324,20 @@ def convert_watsonx_to_openai_format(watsonx_data):
     openai_models = []
 
     for model in watsonx_data['resources']:
+        model_limits = model.get('model_limits', {})
+        max_sequence_length = model_limits.get('max_sequence_length', 8192)
+        # Newer models omit max_output_tokens; fall back to max_sequence_length
+        max_output_tokens = model_limits.get('max_output_tokens', max_sequence_length)
         openai_model = {
-            "id": model['model_id'],  # Watsonx's model_id maps to OpenAI's id
-            "object": "model",  # Hardcoded, as OpenAI uses "model" as the object type
-            "created": int(time.time()),  # Optional: use current timestamp or a fixed one if available
-            "owned_by": f"{model['provider']} / {model['source']}",  # Combine Watsonx's provider and source
-            "description": f"{model['short_description']} Supports tasks like {', '.join(model.get('task_ids', []))}.",  # Watsonx's short description
-            "max_completion_tokens": model['model_limits']['max_output_tokens'],  # Map Watsonx's max_output_tokens to OpenAI's max_completion_tokens
+            "id": model['model_id'],
+            "object": "model",
+            "created": int(time.time()),
+            "owned_by": f"{model.get('provider', 'IBM')} / {model.get('source', 'IBM')}",
+            "description": f"{model.get('short_description', '')} Supports tasks like {', '.join(model.get('task_ids', []))}.",
+            "max_completion_tokens": max_output_tokens,
             "token_limits": {
-                "max_sequence_length": model['model_limits']['max_sequence_length'],  # Watsonx's max_sequence_length
-                "max_output_tokens": model['model_limits']['max_output_tokens']  # Watsonx's max_output_tokens
+                "max_sequence_length": max_sequence_length,
+                "max_output_tokens": max_output_tokens,
             }
         }
         openai_models.append(openai_model)
@@ -371,17 +375,19 @@ async def fetch_model_by_id(model_id: str):
         model = next((m for m in models['resources'] if m['model_id'] == model_id), None)
 
         if model:
-            # Convert the model details to OpenAI-like format
+            model_limits = model.get('model_limits', {})
+            max_sequence_length = model_limits.get('max_sequence_length', 8192)
+            max_output_tokens = model_limits.get('max_output_tokens', max_sequence_length)
             openai_model = {
-                "id": model['model_id'],  # Watsonx's model_id maps to OpenAI's id
-                "object": "model",  # Hardcoded, as OpenAI uses "model" as the object type
-                "created": int(time.time()),  # Optional: use current timestamp or a fixed one if available
-                "owned_by": f"{model['provider']} / {model['source']}",  # Combine Watsonx's provider and source
-                "description": f"{model['short_description']} Supports tasks like {', '.join(model.get('task_ids', []))}.",  # Watsonx's short description
-                "max_completion_tokens": model['model_limits']['max_output_tokens'],  # Map Watsonx's max_output_tokens to OpenAI's max_completion_tokens
+                "id": model['model_id'],
+                "object": "model",
+                "created": int(time.time()),
+                "owned_by": f"{model.get('provider', 'IBM')} / {model.get('source', 'IBM')}",
+                "description": f"{model.get('short_description', '')} Supports tasks like {', '.join(model.get('task_ids', []))}.",
+                "max_completion_tokens": max_output_tokens,
                 "token_limits": {
-                    "max_sequence_length": model['model_limits']['max_sequence_length'],  # Watsonx's max_sequence_length
-                    "max_output_tokens": model['model_limits']['max_output_tokens']  # Watsonx's max_output_tokens
+                    "max_sequence_length": max_sequence_length,
+                    "max_output_tokens": max_output_tokens,
                 }
             }
             return {"data": [openai_model]}
